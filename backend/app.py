@@ -1,5 +1,5 @@
 from flask import Flask
-from backend.routes import rotas_bp
+from routes import rotas_bp
 
 app = Flask(__name__)
 
