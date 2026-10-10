@@ -1,7 +1,7 @@
 const API_BASE =
   new URLSearchParams(window.location.search).get("api") ||
   window.URL_SHORTENER_API ||
-  "http://localhost:5000";
+  "http://127.0.0.1:5000";
 const HISTORY_KEY = "encurta.links";
 const MAX_HISTORY = 5;
 
@@ -188,6 +188,7 @@ form.addEventListener("submit", async (event) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: originalUrl }),
     });
+    console.log(response);
 
     const data = await response.json();
     if (!response.ok) {
