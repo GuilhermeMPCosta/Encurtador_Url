@@ -1,17 +1,19 @@
-# Encurtador de URL
+# Encurta.
 
-Interface web estática para encurtar links usando a API Flask existente.
+Interface frontend do encurtador de URLs construída com Laravel e Livewire. A integração e a lógica de encurtamento ainda não estão implementadas.
 
-## Front-end
+## Requisitos
 
-Abra `frontend/index.html` diretamente ou sirva a pasta `frontend` com qualquer servidor estático. Não há dependências de build.
+- PHP 8.2 ou superior
+- Composer
 
-Por padrão, a interface envia as requisições para `http://localhost:5000`. Para usar outra URL de API, informe-a na query string, por exemplo:
+## Como executar
 
-```text
-http://localhost:5500/?api=https://api.exemplo.com
+```powershell
+composer install
+Copy-Item .env.example .env
+php artisan key:generate
+php artisan serve
 ```
 
-Se o front-end e a API estiverem em origens diferentes, a API precisa permitir a origem do front-end via CORS. O front-end usa `POST /encurtar` com o corpo JSON `{ "url": "https://exemplo.com" }`.
-
-O histórico dos últimos cinco links fica salvo no armazenamento local do navegador.
+Acesse `http://127.0.0.1:8000`. O formulário, a área de resultado e o histórico são apenas a interface; o botão de encurtar informa que o backend ainda precisa ser integrado.
