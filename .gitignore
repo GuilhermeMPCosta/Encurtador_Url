@@ -179,17 +179,3 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
-
-# Laravel
-/vendor
-/node_modules
-/public/build
-/public/hot
-/storage/*.key
-/storage/framework/cache/data
-/storage/framework/sessions
-/storage/framework/views
-/storage/logs
-/bootstrap/cache/*.php
-/.phpunit.cache
-/.phpunit.result.cache
