@@ -1,7 +1,7 @@
 const API_BASE =
   new URLSearchParams(window.location.search).get("api") ||
   window.URL_SHORTENER_API ||
-  "http://127.0.0.1:5000";
+  window.location.origin;
 const HISTORY_KEY = "encurta.links";
 const MAX_HISTORY = 5;
 
@@ -20,30 +20,24 @@ const historyCount = document.querySelector("#history-count");
 let currentShortUrl = "";
 let history = loadHistory();
 
-function loadHistory() {
+async function loadHistory() {
   try {
-    const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
-    if (!Array.isArray(saved)) {
-      throw new TypeError("O histórico salvo não tem o formato esperado.");
+    const response = await fetch(`${API_BASE.replace(/\/+$/, "")}/meus-urls`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+    if (!response.ok) {
+      throw new Error("Não foi possível carregar o histórico de links.");
     }
-    return saved.filter(
-      (item) =>
-        item &&
-        typeof item.shortUrl === "string" &&
-        typeof item.originalUrl === "string",
-    );
+    const data = await response.json();
+    if (!Array.isArray(data)) {
+      throw new Error("A resposta do servidor não trouxe o histórico de links.");
+    }
+    return data;
   } catch (error) {
     console.warn("Não foi possível carregar o histórico de links.", error);
     return [];
-  }
-}
-
-function saveHistory() {
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-  } catch (error) {
-    console.error("Não foi possível salvar o histórico de links.", error);
-    showMessage("O link foi criado, mas não foi possível salvar o histórico neste dispositivo.");
   }
 }
 
@@ -187,8 +181,8 @@ form.addEventListener("submit", async (event) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: originalUrl }),
+      credentials: "include",
     });
-    console.log(response);
 
     const data = await response.json();
     if (!response.ok) {
@@ -207,7 +201,6 @@ form.addEventListener("submit", async (event) => {
       { shortUrl: currentShortUrl, originalUrl },
       ...history.filter((item) => item.shortUrl !== currentShortUrl),
     ].slice(0, MAX_HISTORY);
-    saveHistory();
     renderHistory();
   } catch (error) {
     console.error("Falha ao encurtar o link.", error);
