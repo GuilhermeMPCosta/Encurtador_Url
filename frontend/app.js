@@ -18,7 +18,7 @@ const historyList = document.querySelector("#history-list");
 const historyCount = document.querySelector("#history-count");
 
 let currentShortUrl = "";
-let history = loadHistory();
+let history = [];
 
 async function loadHistory() {
   try {
@@ -34,11 +34,17 @@ async function loadHistory() {
     if (!Array.isArray(data)) {
       throw new Error("A resposta do servidor não trouxe o histórico de links.");
     }
-    return data;
+    const apiBase = API_BASE.replace(/\/+$/, "");
+    history = data.map((item) => ({
+      shortUrl: item.shortUrl || `${apiBase}/${item.codigo}`,
+      originalUrl: item.originalUrl || item.url_original,
+      createdAt: item.created_at || item.createdAt,
+    })).slice(0,MAX_HISTORY);
   } catch (error) {
     console.warn("Não foi possível carregar o histórico de links.", error);
-    return [];
+    history = [];
   }
+  renderHistory();
 }
 
 function normalizeUrl(value) {
@@ -113,6 +119,20 @@ function renderHistory() {
     originalLink.title = item.originalUrl;
 
     details.append(shortLink, originalLink);
+    if (item.createdAt) {
+      const createdAt = new Date(item.createdAt);
+      if (!Number.isNaN(createdAt.getTime())) {
+        const createdAtLabel = document.createElement("time");
+        createdAtLabel.className = "history-created";
+        createdAtLabel.dateTime = createdAt.toISOString();
+        createdAtLabel.textContent = new Intl.DateTimeFormat("pt-BR", {
+          dateStyle: "short",
+          timeStyle: "short",
+          timeZone: "America/Sao_Paulo",
+        }).format(createdAt);
+        details.append(createdAtLabel);
+      }
+    }
 
     const copy = document.createElement("button");
     copy.className = "history-copy";
@@ -198,7 +218,7 @@ form.addEventListener("submit", async (event) => {
     resultCard.hidden = false;
 
     history = [
-      { shortUrl: currentShortUrl, originalUrl },
+      { shortUrl: currentShortUrl, originalUrl, createdAt: data.created_at },
       ...history.filter((item) => item.shortUrl !== currentShortUrl),
     ].slice(0, MAX_HISTORY);
     renderHistory();
@@ -232,4 +252,4 @@ clearButton.addEventListener("click", () => {
 
 copyButton.addEventListener("click", () => copyToClipboard(currentShortUrl, copyButton));
 
-renderHistory();
+loadHistory();

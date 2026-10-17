@@ -526,6 +526,11 @@ h1 span {
   white-space: nowrap;
 }
 
+.history-created {
+  color: #777c8f;
+  font-size: 10px;
+}
+
 .history-copy {
   width: 32px;
   height: 32px;

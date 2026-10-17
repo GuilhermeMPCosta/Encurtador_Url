@@ -1,10 +1,19 @@
 import string
 import random
+from datetime import datetime, timezone
 from flask import Blueprint, make_response, request, jsonify,redirect,render_template
 import database
 import uuid
 
 rotas_bp = Blueprint('rotas',__name__)
+
+def timestamp_utc_iso(valor):
+    if not valor:
+        return None
+    data = datetime.fromisoformat(valor.replace('Z', '+00:00'))
+    if data.tzinfo is None:
+        data = data.replace(tzinfo=timezone.utc)
+    return data.astimezone(timezone.utc).isoformat(timespec='seconds').replace('+00:00', 'Z')
 
 def gerar_codigo_curto(tamanho=6):
     caracteres = string.ascii_letters + string.digits
@@ -30,10 +39,12 @@ def encurtar():
 
     codigo = gerar_codigo_curto()
     database.salvar_url(codigo, url_original, usuario_id)
+    url_criada = database.buscar_por_codigo(codigo)
 
     resposta = make_response(jsonify({
         'url_encurtada': f"http://localhost:5000/{codigo}",
-        'codigo':codigo
+        'codigo': codigo,
+        'created_at': timestamp_utc_iso(url_criada['created_at'])
     }), 201)
 
     if novo_usuario:
@@ -68,5 +79,7 @@ def meu_urls():
 
     links = database.listar_urls(usuario_id)
     links_lista = [dict(link) for link in links]
+    for link in links_lista:
+        link['created_at'] = timestamp_utc_iso(link['created_at'])
     print(f"Links encontrados para o usuário {usuario_id}: {links_lista}")
     return jsonify(links_lista)
