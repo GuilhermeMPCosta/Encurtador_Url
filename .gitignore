@@ -180,4 +180,4 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
-.encurtador.db
+.db
